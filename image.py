@@ -14,15 +14,19 @@ def addScale(minTemp, maxTemp, scaleStep, IMAGE_PATH):
         img, 0, 0, 0, 35, cv2.BORDER_CONSTANT, value=[255, 255, 255])
 
     # scaleStep = (maxTemp - minTemp)/scaleSize
-    scaleSize = int((maxTemp - minTemp)//scaleStep)
+    scaleSize = int((maxTemp - minTemp)//scaleStep + (maxTemp - minTemp)%scaleStep)
     h, w = img.shape[:2]
     font = cv2.FONT_HERSHEY_PLAIN
 
     for i in range(1, scaleSize):
-        img = cv2.line(img,(0, h//scaleSize*i), (w, h//scaleSize*i), (0,0,0),1)
+        img = cv2.line(img,(0, h//scaleSize*i), (w - 15 - 15 * (i % 2) , h//scaleSize*i), (0,0,0),1)
 
     for i in range(1, scaleSize + 1):
-        cv2.putText(img, str(maxTemp-scaleStep*i)[0:4], (15, abs(h//scaleSize*i - h//scaleSize//2) + 6), font, 1, (0, 0, 0), 1, cv2.LINE_AA)
+        # cv2.putText(img, str(maxTemp-scaleStep*i)[0:4], (15, abs(h//scaleSize*i - h//scaleSize//2) + i * scaleSize), font, 0.7, (0, 0, 0), 1, cv2.LINE_AA)
+        cv2.putText(img, str(maxTemp-scaleStep*i)[0:4], (13, h//scaleSize*i - 2), font, 0.7, (0, 0, 0), 1, cv2.LINE_AA)
+
+    cv2.putText(img, 'C', (35, 14), font, 1, (0, 0, 0), 1, cv2.LINE_AA)
+    cv2.putText(img, 'o', (29, 8), font, 0.7, (0, 0, 0), 1, cv2.LINE_AA)
 
     # for i in range(0, scaleSize + 1):
     #     # img_mof = cv2.line(img,(0,0),(w, h),(0,0,255),1)
@@ -50,11 +54,11 @@ def cleanImage (img):
     se = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     bg = cv2.morphologyEx(img, cv2.MORPH_DILATE, se)
     out_gray = cv2.divide(img, bg, scale=255)
-    # return cv2.threshold(se, 0, 255, cv2.THRESH_OTSU)[1]
+    # return img
     return img
 
 def readTempFromImage (IMAGE_PATH):
-    reader = easyocr.Reader(['en'], gpu=True)
+    reader = easyocr.Reader(['en'])#, gpu=True)
     result = reader.readtext(IMAGE_PATH)
     tempFromImage = [int(re.findall('\d\d', row[1])[0]) for row in result if re.search('\d\d+', row[1])]
     if len(tempFromImage) == 1:

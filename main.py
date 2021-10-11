@@ -54,21 +54,15 @@ def recolorImage(value ,IMAGE_PATH, IMAGE_SAVE_PATH):
     hsv_res[:, :, :3][mask] = [255, 255, 0]
     value = value - 2
     for i in range(0, value):
-        print(i, 'asd')
         max_value = 140
         lower = (i * max_value // value, 80, 50)
         upper = ((i + 1) * max_value // value, 255, 255)
         mask = cv2.inRange(hsv_img, lower, upper)
         mask = mask/255
         mask = mask.astype(np.bool)
-        # hsv_res[:, :, :3][mask] = [i * max_value//value, 255 - 100*i//value, 255]
         hsv_res[:, :, :3][mask] = [i * max_value // value, 255, 255]
-    # cv2.imshow('Result', cv2.cvtColor(hsv_res, cv2.COLOR_HSV2BGR))
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+
     res = cv2.cvtColor(hsv_res, cv2.COLOR_HSV2BGR)
-    # ksize = (5, 5)
-    # res = cv2.blur(res, ksize)
     cv2.imwrite(IMAGE_SAVE_PATH, res)
 
 def recoloeScale(value, IMAGE_PATH, IMAGE_SAVE_PATH):

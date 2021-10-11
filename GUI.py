@@ -1,10 +1,8 @@
 import wx
-import time
 import shutil
 import os.path
 from image import *
 from main import *
-# from test import *
 
 MAIN_IMAGE = 'ProjectData\\main_img.jpg'
 CUT_IMAGE = 'ProjectData\\cut_img.jpg'
@@ -62,9 +60,12 @@ class Program(wx.App):
 
     def createWidgets(self):
         # creating space for widgets
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.windowRow_1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.windowRow_2 = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.imageBox_H_1 = wx.BoxSizer(wx.HORIZONTAL)
+        self.userBox_V_2 = wx.BoxSizer(wx.VERTICAL)
+        self.userBox_2_Row_1 = wx.BoxSizer(wx.HORIZONTAL)
+        self.userBox_2_Row_2 = wx.BoxSizer(wx.HORIZONTAL)
+        self.userBox_2_Row_3 = wx.BoxSizer(wx.HORIZONTAL)
 
         #load default bar image
         img_bar = wx.Image(self.barScaleImagePath, wx.BITMAP_TYPE_ANY)
@@ -104,44 +105,60 @@ class Program(wx.App):
 
         #initialization image widgets
         self.img_original = wx.StaticBitmap(self.panel, wx.ID_ANY,
-                                         wx.BitmapFromImage(img_original))
+                                         wx.Bitmap(img_original))
 
         self.img_main = wx.StaticBitmap(self.panel, wx.ID_ANY,
-                                         wx.BitmapFromImage(img_main))
+                                         wx.Bitmap(img_main))
 
         self.img_bar = wx.StaticBitmap(self.panel, wx.ID_ANY,
-                                         wx.BitmapFromImage(img_bar))
+                                         wx.Bitmap(img_bar))
 
         self.recolor_img_bar = wx.StaticBitmap(self.panel, wx.ID_ANY,
-                                         wx.BitmapFromImage(recolor_img_bar))
+                                         wx.Bitmap(recolor_img_bar))
         #initialization button widgets 
-        browseBtn = wx.Button(self.panel, label='Browse')
+        browseBtn = wx.Button(self.panel, label='Загрузить')
         browseBtn.Bind(wx.EVT_BUTTON, self.onBrowse)
 
-        executeButton = wx.Button(self.panel, label='Execute')
+        executeButton = wx.Button(self.panel, label='Задать цену деления')
         executeButton.Bind(wx.EVT_BUTTON, self.onExecute)
+
+        diaposoneButton = wx.Button(self.panel, label='Выделить')
+        diaposoneButton.Bind(wx.EVT_BUTTON, self.onExecute)
+
 
         #initialization text input widgets
         self.scaleSize = wx.TextCtrl(self.panel, size=(50, -1))
+        self.thempFrom = wx.TextCtrl(self.panel, size=(50, -1))
+        self.thempTo = wx.TextCtrl(self.panel, size=(50, -1))
 
         #add labels
         self.tempLabel = wx.StaticText(self.panel, size=(50, -1), label='min: 0\nmax: 99')
 
         # Add widgets to space recolor_img_bar
-        self.windowRow_1.Add(self.img_original, 0, wx.ALL, 5)
-        self.windowRow_1.Add(self.img_bar, 0, wx.ALL, 5)
-        self.windowRow_1.Add(self.img_main, 0, wx.ALL, 5)
-        self.windowRow_1.Add(self.recolor_img_bar, 0, wx.ALL, 5)
-        self.windowRow_1.Fit(self.frame)
+        self.imageBox_H_1.Add(self.img_original, 0, wx.ALL, 5)
+        self.imageBox_H_1.Add(self.img_bar, 0, wx.ALL, 5)
+        self.imageBox_H_1.Add(self.img_main, 0, wx.ALL, 5)
+        self.imageBox_H_1.Add(self.recolor_img_bar, 0, wx.ALL, 5)
+        self.imageBox_H_1.Fit(self.frame)
 
-        self.windowRow_2.Add(browseBtn, 0, wx.ALL, 5)
-        self.windowRow_2.Add(executeButton, 0, wx.ALL, 5)
-        self.windowRow_2.Add(self.scaleSize, 0, wx.ALL, 5)
-        self.windowRow_2.Add(self.tempLabel, 0, wx.ALL, 5)
-        self.windowRow_2.Fit(self.frame)
+        self.userBox_V_2.Add(browseBtn, 0, wx.ALL, 5)
 
-        self.mainSizer.Add(self.windowRow_1, 0, wx.ALL, 5)
-        self.mainSizer.Add(self.windowRow_2, 0, wx.ALL, 5)
+        self.userBox_2_Row_1.Add(executeButton, 0, wx.ALL, 5)
+        self.userBox_2_Row_1.Add(self.scaleSize, 0, wx.ALL, 5)
+        self.userBox_V_2.Add(self.userBox_2_Row_1, 0, wx.ALL, 0)
+
+        self.userBox_2_Row_2.Add(diaposoneButton, 0, wx.ALL, 5)
+        self.userBox_2_Row_2.Add(self.thempFrom, 0, wx.ALL, 5)
+        self.userBox_2_Row_2.Add(self.thempTo, 0, wx.ALL, 5)
+        self.userBox_V_2.Add(self.userBox_2_Row_2, 0, wx.ALL, 0)
+
+        self.userBox_2_Row_3.Add(self.tempLabel, 0, wx.ALL, 5)
+        self.userBox_V_2.Add(self.userBox_2_Row_3, 0, wx.ALL, 0)
+
+        self.userBox_V_2.Fit(self.frame)
+
+        self.mainSizer.Add(self.imageBox_H_1, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.userBox_V_2, 0, wx.ALL, 5)
         self.mainSizer.Fit(self.frame)
 
         self.panel.SetSizer(self.mainSizer)
@@ -216,12 +233,12 @@ class Program(wx.App):
             img_original = img_original.Scale(NewW, NewH)
 
         #initialization image widgets
-        self.img_main.SetBitmap(wx.BitmapFromImage(img_main))
-        self.img_bar.SetBitmap(wx.BitmapFromImage(img_bar))
-        self.img_original.SetBitmap(wx.BitmapFromImage(img_original))
-        self.recolor_img_bar.SetBitmap(wx.BitmapFromImage(img_recolor_bar))
+        self.img_main.SetBitmap(wx.Bitmap(img_main))
+        self.img_bar.SetBitmap(wx.Bitmap(img_bar))
+        self.img_original.SetBitmap(wx.Bitmap(img_original))
+        self.recolor_img_bar.SetBitmap(wx.Bitmap(img_recolor_bar))
 
-        self.tempLabel.SetLabel('min: '+str(self.minTemp)+'\nmax: '+str(self.maxTemp))
+        self.tempLabel.SetLabel('Диапозон температур: '+str(self.minTemp)+' - '+str(self.maxTemp))
             # = wx.StaticText(self.panel, size=(50, -1), label='min: '+self.minTemp+'\nmax: '+self.maxTemp)
 
         self.panel.Refresh()
