@@ -58,7 +58,7 @@ def cleanImage (img):
     return img
 
 def readTempFromImage (IMAGE_PATH):
-    reader = easyocr.Reader(['en'])#, gpu=True)
+    reader = easyocr.Reader(['en'], gpu=True)
     result = reader.readtext(IMAGE_PATH)
     tempFromImage = [int(re.findall('\d\d', row[1])[0]) for row in result if re.search('\d\d+', row[1])]
     if len(tempFromImage) == 1:

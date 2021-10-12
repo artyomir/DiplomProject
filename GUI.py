@@ -4,23 +4,23 @@ import os.path
 from image import *
 from main import *
 
-MAIN_IMAGE = 'ProjectData\\main_img.jpg'
-CUT_IMAGE = 'ProjectData\\cut_img.jpg'
-REDRAW_IMAGE = 'ProjectData\\redraw_img.jpg'
-DEFAULT_MAIN_IMAGE = 'ImageData\\default_image.jpg'
+MAIN_IMAGE = 'ProjectData/main_img.jpg'
+CUT_IMAGE = 'ProjectData/cut_img.jpg'
+REDRAW_IMAGE = 'ProjectData/redraw_img.jpg'
+DEFAULT_MAIN_IMAGE = 'ImageData/default_image.jpg'
 
-BAR_IMAGE = 'ProjectData\\main_bar.jpg'
-SCALE_BAR_IMG = 'ProjectData\\scale_bar.jpg'
-RECOLOR_BAR_IMG = 'ProjectData\\rocolor_bar.jpg'
-DEFAULT_BAR_IMAGE = 'ImageData\\default_bar.jpg'
+BAR_IMAGE = 'ProjectData/main_bar.jpg'
+SCALE_BAR_IMG = 'ProjectData/scale_bar.jpg'
+RECOLOR_BAR_IMG = 'ProjectData/rocolor_bar.jpg'
+DEFAULT_BAR_IMAGE = 'ImageData/default_bar.jpg'
 
-ORIGINAL_IMAGE = 'ProjectData\\original_image.jpg'
+ORIGINAL_IMAGE = 'ProjectData/original_image.jpg'
 
 
 class Program(wx.App):
     def __init__(self, redirect=False, filename=None):
         wx.App.__init__(self, redirect, filename)
-        self.frame = wx.Frame(None, title='Photo Control')  # , style= wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX)
+        self.frame = wx.Frame(None, title='Thermo Field')  # , style= wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX)
 
         self.panel = wx.Panel(self.frame)
         self.PhotoMaxHeight = 600
@@ -55,18 +55,13 @@ class Program(wx.App):
         self.createWidgets()
         self.frame.Show()
 
+        self.fromThemp = 0
+        self.toThemp = 0
+
         self.scaleSize.SetValue(str('0.5'))
         self.onExecute(None)
 
     def createWidgets(self):
-        # creating space for widgets
-        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.imageBox_H_1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.userBox_V_2 = wx.BoxSizer(wx.VERTICAL)
-        self.userBox_2_Row_1 = wx.BoxSizer(wx.HORIZONTAL)
-        self.userBox_2_Row_2 = wx.BoxSizer(wx.HORIZONTAL)
-        self.userBox_2_Row_3 = wx.BoxSizer(wx.HORIZONTAL)
-
         #load default bar image
         img_bar = wx.Image(self.barScaleImagePath, wx.BITMAP_TYPE_ANY)
         W = img_bar.GetWidth()
@@ -116,14 +111,18 @@ class Program(wx.App):
         self.recolor_img_bar = wx.StaticBitmap(self.panel, wx.ID_ANY,
                                          wx.Bitmap(recolor_img_bar))
         #initialization button widgets 
-        browseBtn = wx.Button(self.panel, label='Загрузить')
+        browseBtn = wx.Button(self.panel, label='Загрузить ')
         browseBtn.Bind(wx.EVT_BUTTON, self.onBrowse)
+        browseBtn.SetSize(wx.Size(500, 500))
 
-        executeButton = wx.Button(self.panel, label='Задать цену деления')
+        saveBtn = wx.Button(self.panel, label='Сохранить')
+        saveBtn.Bind(wx.EVT_BUTTON, self.onSave)
+
+        executeButton = wx.Button(self.panel, label='Задать цену деления ')
         executeButton.Bind(wx.EVT_BUTTON, self.onExecute)
 
         diaposoneButton = wx.Button(self.panel, label='Выделить')
-        diaposoneButton.Bind(wx.EVT_BUTTON, self.onExecute)
+        diaposoneButton.Bind(wx.EVT_BUTTON, self.onHighlite)
 
 
         #initialization text input widgets
@@ -133,33 +132,52 @@ class Program(wx.App):
 
         #add labels
         self.tempLabel = wx.StaticText(self.panel, size=(50, -1), label='min: 0\nmax: 99')
+        self.scaleDoubleDot = wx.StaticText(self.panel, label=' : ')
+        self.scaleDiapasoneDoubleDot = wx.StaticText(self.panel, label=':')
+        self.scaleDiapasoneDifis = wx.StaticText(self.panel, label='-')
+
+        # creating space for widgets
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.imageBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.userBox = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.saveUploadBox = wx.BoxSizer(wx.VERTICAL)
+
+        self.scaleBox = wx.BoxSizer(wx.VERTICAL)
+        self.scaleSizeBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.scaleDiapasoneBox = wx.BoxSizer(wx.HORIZONTAL)
 
         # Add widgets to space recolor_img_bar
-        self.imageBox_H_1.Add(self.img_original, 0, wx.ALL, 5)
-        self.imageBox_H_1.Add(self.img_bar, 0, wx.ALL, 5)
-        self.imageBox_H_1.Add(self.img_main, 0, wx.ALL, 5)
-        self.imageBox_H_1.Add(self.recolor_img_bar, 0, wx.ALL, 5)
-        self.imageBox_H_1.Fit(self.frame)
+        self.imageBox.Add(self.img_original, 0, wx.ALL, 5)
+        self.imageBox.Add(self.img_bar, 0, wx.ALL, 5)
+        self.imageBox.Add(self.img_main, 0, wx.ALL, 5)
+        self.imageBox.Add(self.recolor_img_bar, 0, wx.ALL, 5)
+        self.imageBox.Fit(self.frame)
 
-        self.userBox_V_2.Add(browseBtn, 0, wx.ALL, 5)
+        self.saveUploadBox.Add(browseBtn, 0, wx.ALL, 5)
+        self.saveUploadBox.Add(saveBtn, 0, wx.ALL, 5)
+        self.userBox.Add( self.saveUploadBox, 0, wx.ALL, 0)
 
-        self.userBox_2_Row_1.Add(executeButton, 0, wx.ALL, 5)
-        self.userBox_2_Row_1.Add(self.scaleSize, 0, wx.ALL, 5)
-        self.userBox_V_2.Add(self.userBox_2_Row_1, 0, wx.ALL, 0)
+        self.scaleSizeBox.Add(executeButton, 0, wx.ALL, 5)
+        self.scaleSizeBox.Add(self.scaleDoubleDot, 0, wx.ALL, 5)
+        self.scaleSizeBox.Add(self.scaleSize, 0, wx.ALL, 5)
+        self.scaleBox.Add(self.scaleSizeBox, 0, wx.ALL, 0)
 
-        self.userBox_2_Row_2.Add(diaposoneButton, 0, wx.ALL, 5)
-        self.userBox_2_Row_2.Add(self.thempFrom, 0, wx.ALL, 5)
-        self.userBox_2_Row_2.Add(self.thempTo, 0, wx.ALL, 5)
-        self.userBox_V_2.Add(self.userBox_2_Row_2, 0, wx.ALL, 0)
+        self.scaleDiapasoneBox.Add(diaposoneButton, 0, wx.ALL, 5)
+        self.scaleDiapasoneBox.Add(self.scaleDiapasoneDoubleDot, 0, wx.ALL, 5)
+        self.scaleDiapasoneBox.Add(self.thempFrom, 0, wx.ALL, 5)
+        self.scaleDiapasoneBox.Add(self.scaleDiapasoneDifis, 0, wx.ALL, 5)
+        self.scaleDiapasoneBox.Add(self.thempTo, 0, wx.ALL, 5)
+        self.scaleBox.Add(self.scaleDiapasoneBox, 0, wx.ALL, 0)
 
-        self.userBox_2_Row_3.Add(self.tempLabel, 0, wx.ALL, 5)
-        self.userBox_V_2.Add(self.userBox_2_Row_3, 0, wx.ALL, 0)
+        self.userBox.Add(self.scaleBox, 0, wx.ALL, 0)
+        self.userBox.Add(self.tempLabel, 0, wx.ALL, 5)
 
-        self.userBox_V_2.Fit(self.frame)
+        self.userBox.Fit(self.frame)
 
-        self.mainSizer.Add(self.imageBox_H_1, 0, wx.ALL, 5)
-        self.mainSizer.Add(self.userBox_V_2, 0, wx.ALL, 5)
-        self.mainSizer.Fit(self.frame)
+        self.mainSizer.Add(self.imageBox, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.userBox, 0, wx.ALL, 5)
+        self.mainSizer.Fit(self.frame) #added  sizers
 
         self.panel.SetSizer(self.mainSizer)
         self.panel.Layout()
@@ -183,6 +201,15 @@ class Program(wx.App):
         self.onExecute(None)
         self.onView()
 
+    def onSave(self, event):
+        wildcard = "JPEG files (*.jpg)|*.jpg"
+        dialog = wx.FileDialog(None, "Save to file:",
+                               wildcard=wildcard,
+                               style=wx.FD_SAVE)
+
+        if dialog.ShowModal() == wx.ID_OK:
+            shutil.copyfile(self.mainRedrawImagePath, dialog.GetPath())
+
     def onExecute(self, event):
 
         img = addScale(self.minTemp, self.maxTemp, float(self.scaleSize.GetValue()), self.barImagePath)
@@ -190,9 +217,17 @@ class Program(wx.App):
         # CutBar(int(self.scaleSize.GetValue()), self.barImagePath)
         CutBar(int((self.maxTemp-self.minTemp)/float(self.scaleSize.GetValue())), self.barImagePath)
         recolorExe(self.cutImage, self.mainRedrawImagePath)
-        recoloeScale(int((self.maxTemp-self.minTemp)/float(self.scaleSize.GetValue())),self.barImagePath, self.recolorBarImgPath)
-        img = addScale(self.minTemp, self.maxTemp, float(self.scaleSize.GetValue()), self.recolorBarImgPath)
+        recoloeScale(int((self.maxTemp-self.minTemp)/float(self.scaleSize.GetValue())),
+                     self.barImagePath, self.recolorBarImgPath)
+        img = addScale(self.minTemp, self.maxTemp,
+                       float(self.scaleSize.GetValue()), self.recolorBarImgPath)
         cv2.imwrite(self.recolorBarImgPath, img)
+        self.onView()
+
+    def onHighlite(self, event):
+        highLiteDiaposone(self.minTemp, self.maxTemp,
+                          int(self.thempFrom.GetValue()), int(self.thempTo.GetValue()),
+                          self.cutImage, self.mainRedrawImagePath)
         self.onView()
 
     def onView(self):
@@ -238,9 +273,7 @@ class Program(wx.App):
         self.img_original.SetBitmap(wx.Bitmap(img_original))
         self.recolor_img_bar.SetBitmap(wx.Bitmap(img_recolor_bar))
 
-        self.tempLabel.SetLabel('Диапозон температур: '+str(self.minTemp)+' - '+str(self.maxTemp))
-            # = wx.StaticText(self.panel, size=(50, -1), label='min: '+self.minTemp+'\nmax: '+self.maxTemp)
-
+        self.tempLabel.SetLabel('Диапозон температур:\n'+str(self.minTemp)+'°С - '+str(self.maxTemp)+'°С')
         self.panel.Refresh()
 
 if __name__ == '__main__':

@@ -2,8 +2,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-def highLiteDiaposone(minTemp, maxTemp, fromTemp, toTemp, IMAGE_PATH): #25 33
-
+def highLiteDiaposone(minTemp, maxTemp, fromTemp, toTemp, IMAGE_PATH, IMAGE_SAVE_PATH): #25 33
 
     img = cv2.imread(IMAGE_PATH)
     ksize = (10, 10)
@@ -18,7 +17,7 @@ def highLiteDiaposone(minTemp, maxTemp, fromTemp, toTemp, IMAGE_PATH): #25 33
         mask = cv2.inRange(hsv_res, lower_white, upper_white)
         mask = mask / 255
         mask = mask.astype(np.bool)
-        hsv_res[:, :, :3][mask] = [0, 0, 255]
+        hsv_res[:, :, :3][mask] = [160, 200, 255]
 
     if (fromTemp - minTemp <= .5):
         lower_black = np.array([0, 0, 0])
@@ -26,7 +25,7 @@ def highLiteDiaposone(minTemp, maxTemp, fromTemp, toTemp, IMAGE_PATH): #25 33
         mask = cv2.inRange(hsv_res, lower_black, upper_black)
         mask = mask / 255
         mask = mask.astype(np.bool)
-        hsv_res[:, :, :3][mask] = [0, 80, 255]
+        hsv_res[:, :, :3][mask] = [160, 200, 255]
 
 
 
@@ -39,20 +38,27 @@ def highLiteDiaposone(minTemp, maxTemp, fromTemp, toTemp, IMAGE_PATH): #25 33
     l = m - int(m * z / x)
     u = m - int(m * a / x)
 
+    if toTemp > maxTemp - (maxTemp - minTemp) // 2:
+        l = l // 8 - 3
+    else:
+        l = l + 8
+    if l < 0:
+        l = 0
+
+    u = u + 10
     lower = (l , 80, 50)
     upper = (u , 255, 255)
     mask = cv2.inRange(hsv_res, lower, upper)
     mask = mask / 255
     mask = mask.astype(np.bool)
-    hsv_res[:, :, :3][mask] = [0, 0, 255]
+    hsv_res[:, :, :3][mask] = [160, 200, 255]
 
     res = cv2.cvtColor(hsv_res, cv2.COLOR_HSV2RGB)
     plt.subplot(1, 1, 1)
     plt.imshow(res)
     plt.show()
     res = cv2.cvtColor(hsv_res, cv2.COLOR_HSV2BGR)
-    # cv2.imwrite(IMAGE_SAVE_PATH, res)
-
+    cv2.imwrite(IMAGE_SAVE_PATH, res)
 
 def recolorImage(value ,IMAGE_PATH, IMAGE_SAVE_PATH):
     img = cv2.imread(IMAGE_PATH)
@@ -126,4 +132,4 @@ def recoloeScaleTest(value, IMAGE_PATH, IMAGE_SAVE_PATH):
         # plt.show()
 
 
-highLiteDiaposone(25, 33, 27, 32, 'ProjectData/original_image.jpg')
+highLiteDiaposone(25, 33, 29, 30, 'ProjectData/original_image.jpg')

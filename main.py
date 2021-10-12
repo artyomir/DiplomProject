@@ -1,24 +1,23 @@
 import numpy as np
 import glob
 import cv2
-from PIL import Image, ImageFilter, ImageEnhance
 
-def recolor(img, IMAGE_PATH):
-    colorsImg = Image.open(IMAGE_PATH)
-    data = np.array(img)
-    colorsData = np.array(colorsImg)
-
-    print(colorsData[0][0])
-
-    red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
-    r2, g2, b2 = int(colorsData[0][0][0]), int(colorsData[0][0][1]), int(colorsData[0][0][2])
-
-    for row in colorsData:
-        r1, g1, b1 = int(row[0][0]), int(row[0][1]), int(row[0][2])
-        mask = (abs(red - r1) < 30) & (abs(green - g1) < 30) & (abs(blue - b1) < 30)
-        data[:, :, :3][mask] = [r2, g2, b2]
-
-    return Image.fromarray(data)
+# def recolor(img, IMAGE_PATH):
+#     colorsImg = Image.open(IMAGE_PATH)
+#     data = np.array(img)
+#     colorsData = np.array(colorsImg)
+#
+#     print(colorsData[0][0])
+#
+#     red, green, blue = data[:, :, 0], data[:, :, 1], data[:, :, 2]
+#     r2, g2, b2 = int(colorsData[0][0][0]), int(colorsData[0][0][1]), int(colorsData[0][0][2])
+#
+#     for row in colorsData:
+#         r1, g1, b1 = int(row[0][0]), int(row[0][1]), int(row[0][2])
+#         mask = (abs(red - r1) < 30) & (abs(green - g1) < 30) & (abs(blue - b1) < 30)
+#         data[:, :, :3][mask] = [r2, g2, b2]
+#
+#     return Image.fromarray(data)
 
 def recoloeScale(value, IMAGE_PATH, IMAGE_SAVE_PATH):
     img = cv2.imread(IMAGE_PATH)
@@ -86,6 +85,64 @@ def recoloeScale(value, IMAGE_PATH, IMAGE_SAVE_PATH):
 
         result_img = cv2.cvtColor(hsv_img, cv2.COLOR_HSV2BGR)
         cv2.imwrite(IMAGE_SAVE_PATH, result_img)
+
+def highLiteDiaposone(minTemp, maxTemp, fromTemp, toTemp, IMAGE_PATH, IMAGE_SAVE_PATH): #25 33
+
+    img = cv2.imread(IMAGE_PATH)
+    ksize = (10, 10)
+    img = cv2.blur(img, ksize)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    hsv_img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    hsv_res = hsv_img.copy()
+
+    if (maxTemp - toTemp <= .5):
+        lower_white = np.array([0, 0, 51])
+        upper_white = np.array([255, 79, 255])
+        mask = cv2.inRange(hsv_res, lower_white, upper_white)
+        mask = mask / 255
+        mask = mask.astype(np.bool)
+        hsv_res[:, :, :3][mask] = [160, 200, 255]
+
+    if (fromTemp - minTemp <= .5):
+        lower_black = np.array([0, 0, 0])
+        upper_black = np.array([255, 255, 50])
+        mask = cv2.inRange(hsv_res, lower_black, upper_black)
+        mask = mask / 255
+        mask = mask.astype(np.bool)
+        hsv_res[:, :, :3][mask] = [160, 200, 255]
+
+
+
+    value = 20
+    x = maxTemp - minTemp
+    y = 0
+    z = toTemp - minTemp
+    a = fromTemp - minTemp
+    m = 140
+    l = m - int(m * z / x)
+    u = m - int(m * a / x)
+
+    if toTemp > maxTemp - (maxTemp - minTemp) // 2:
+        l = l // 8 - 3
+    else:
+        l = l + 8
+    if l < 0:
+        l = 0
+
+    u = u + 10
+    lower = (l , 80, 50)
+    upper = (u , 255, 255)
+    mask = cv2.inRange(hsv_res, lower, upper)
+    mask = mask / 255
+    mask = mask.astype(np.bool)
+    hsv_res[:, :, :3][mask] = [160, 200, 255]
+
+    # res = cv2.cvtColor(hsv_res, cv2.COLOR_HSV2RGB)
+    # plt.subplot(1, 1, 1)
+    # plt.imshow(res)
+    # plt.show()
+    res = cv2.cvtColor(hsv_res, cv2.COLOR_HSV2BGR)
+    cv2.imwrite(IMAGE_SAVE_PATH, res)
 
 def recolorExe(IMAGE_PATH, IMAGE_PATH_SAVE):
     value = len(glob.glob('TempFiles/BarFragments/*'))
