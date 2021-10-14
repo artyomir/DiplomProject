@@ -16,6 +16,7 @@ DEFAULT_BAR_IMAGE = 'ImageData/default_bar.jpg'
 
 ORIGINAL_IMAGE = 'ProjectData/original_image.jpg'
 
+#/Users/katrinmailan/PycharmProjects/pythonProject/DiplomProject
 
 class Program(wx.App):
     def __init__(self, redirect=False, filename=None):
@@ -98,6 +99,10 @@ class Program(wx.App):
             NewW = self.PhotoMaxHeight * W / H
             img_original = img_original.Scale(NewW, NewH)
 
+        #load main image
+        img_miem = wx.Image('ProjectData/miem.png', wx.BITMAP_TYPE_ANY)
+        img_miem = img_miem.Scale(190, 40)
+
         #initialization image widgets
         self.img_original = wx.StaticBitmap(self.panel, wx.ID_ANY,
                                          wx.Bitmap(img_original))
@@ -110,6 +115,9 @@ class Program(wx.App):
 
         self.recolor_img_bar = wx.StaticBitmap(self.panel, wx.ID_ANY,
                                          wx.Bitmap(recolor_img_bar))
+
+        self.miem_img = wx.StaticBitmap(self.panel, wx.ID_ANY,
+                                         wx.Bitmap(img_miem))
         #initialization button widgets 
         browseBtn = wx.Button(self.panel, label='Загрузить ')
         browseBtn.Bind(wx.EVT_BUTTON, self.onBrowse)
@@ -131,7 +139,7 @@ class Program(wx.App):
         self.thempTo = wx.TextCtrl(self.panel, size=(50, -1))
 
         #add labels
-        self.tempLabel = wx.StaticText(self.panel, size=(50, -1), label='min: 0\nmax: 99')
+        self.tempLabel = wx.StaticText(self.panel, size=(150, -1), label='min: 0\nmax: 99')
         self.scaleDoubleDot = wx.StaticText(self.panel, label=' : ')
         self.scaleDiapasoneDoubleDot = wx.StaticText(self.panel, label=':')
         self.scaleDiapasoneDifis = wx.StaticText(self.panel, label='-')
@@ -171,7 +179,8 @@ class Program(wx.App):
         self.scaleBox.Add(self.scaleDiapasoneBox, 0, wx.ALL, 0)
 
         self.userBox.Add(self.scaleBox, 0, wx.ALL, 0)
-        self.userBox.Add(self.tempLabel, 0, wx.ALL, 5)
+        self.userBox.Add(self.tempLabel, 0, wx.ALL, 0)
+        self.userBox.Add(self.miem_img, 0, wx.ALL, 5)
 
         self.userBox.Fit(self.frame)
 
