@@ -148,3 +148,4 @@ def recolorExe(IMAGE_PATH, IMAGE_PATH_SAVE):
     value = len(glob.glob('TempFiles/BarFragments/*'))
     recolorImage(value, IMAGE_PATH, IMAGE_PATH_SAVE)
 
+
