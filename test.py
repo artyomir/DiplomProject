@@ -132,4 +132,5 @@ def recoloeScaleTest(value, IMAGE_PATH, IMAGE_SAVE_PATH):
         # plt.show()
 
 
+
 highLiteDiaposone(25, 33, 29, 30, 'ProjectData/original_image.jpg')

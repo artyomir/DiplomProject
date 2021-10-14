@@ -5,6 +5,7 @@ import glob
 import os
 import re
 
+
 def addScale(minTemp, maxTemp, scaleStep, IMAGE_PATH):
     #Добавляет на изображение шкалу с scaleSize линиями и возвращает новое изображение
     img = cv2.imread(IMAGE_PATH)

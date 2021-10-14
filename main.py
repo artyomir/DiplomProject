@@ -149,3 +149,4 @@ def recolorExe(IMAGE_PATH, IMAGE_PATH_SAVE):
     recolorImage(value, IMAGE_PATH, IMAGE_PATH_SAVE)
 
 
+
